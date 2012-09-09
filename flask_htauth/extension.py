@@ -15,6 +15,23 @@ from .htpasswd import check_password, read_htpasswd
 __all__ = ['HTAuth', 'authenticated']
 
 class HTAuth(object):
+    """
+    This class controls basic HTTP authentication integration with Flask apps.
+
+    You can either bind the app to an instance::
+
+        app = Flask(__app__)
+        auth = HTAuth(app)
+
+    or create the auth object once and bind it later::
+
+        auth = HTAuth()
+
+        def create_app():
+            app = Flask(__name__)
+            auth.init_app(app)
+            return app
+    """
 
     def __init__(self, app=None):
         self._app = app
@@ -23,6 +40,7 @@ class HTAuth(object):
             self.init_app(self._app)
 
     def init_app(self, app):
+        """Bind the **app** to HTAuth instance."""
         app.before_request(self._before_request)
 
     def _before_request(self):
@@ -54,6 +72,8 @@ def _unauthorized_response():
     return None
 
 def authenticated(viewfunc):
+    """Decorate **viewfunc** with this decorator to require HTTP auth on the
+    view."""
     @wraps(viewfunc)
     def wrapper(*args, **kwargs):
         ctx = stack.top
