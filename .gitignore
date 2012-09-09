@@ -3,4 +3,5 @@
 *.pyo
 *.swp
 *.bak
+htpasswd
 

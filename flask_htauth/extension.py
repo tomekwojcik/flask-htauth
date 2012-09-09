@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
 import base64
-from flask import Response, request
+from flask import Response, g, request
 
 try:
     from flask import _app_ctx_stack as stack
@@ -11,6 +11,8 @@ except ImportError:
 from functools import wraps
 
 from .htpasswd import check_password, read_htpasswd
+
+__all__ = ['HTAuth', 'authenticated']
 
 class HTAuth(object):
 
@@ -26,51 +28,55 @@ class HTAuth(object):
     def _before_request(self):
         ctx = stack.top
         if ctx and not hasattr(ctx, 'htauth'):
-            if 'HTAUTH_HTPASSWD_PATH' in ctx.config:
+            if 'HTAUTH_HTPASSWD_PATH' in ctx.app.config:
                 settings = {
-                    'users': read_htpasswd(ctx.config['HTAUTH_HTPASSWD_PATH']),
-                    'realm': ctx.config.get('HTAUTH_HTPASSWD_REALM', 'Protected Area').encode('utf-8')
+                    'users': read_htpasswd(ctx.app.config['HTAUTH_HTPASSWD_PATH']),
+                    'realm': ctx.app.config.get('HTAUTH_REALM', 'Protected Area').encode('utf-8')
                 }
 
                 ctx.htauth = settings
 
-    def _unauthorized_response(self):
+def _unauthorized_response():
+    ctx = stack.top
+    if ctx and hasattr(ctx, 'htauth'):
+        rsp = Response(
+            response='Unauthorized',
+            status=401,
+            headers={
+                'WWW-Authenticate': 'Basic realm="%s"' % ctx.htauth['realm']
+            },
+            mimetype='text/plain',
+            content_type='text/plain;charset=utf-8'
+        )
+
+        return rsp
+
+    return None
+
+def authenticated(viewfunc):
+    @wraps(viewfunc)
+    def wrapper(*args, **kwargs):
         ctx = stack.top
         if ctx and hasattr(ctx, 'htauth'):
-            rsp = Response(
-                response='Unauthorized',
-                status=401,
-                headers={
-                    'WWW-Authenticate': 'Basic realm="%s"' % ctx.htauth['realm']
-                },
-                mimetype='text/plain',
-                content_type='text/plain;charset=utf-8'
-            )
+            auth_header = request.headers.get('Authorization', None)
+            if not auth_header:
+                return _unauthorized_response()
 
-            return rsp
+            if not auth_header.startswith('Basic '):
+                raise RuntimeError('Flask-HTAuth support only Basic auth.')
 
-        return None
+            auth_header = auth_header.replace('Basic ', '')
+            auth_header = base64.b64decode(auth_header)
+            username, password = auth_header.split(':', 1)
 
-    def authenticated(self, f):
-        @wraps(f)
-        def wrapper(*args, **kwargs):
-            ctx = stack.top
-            if ctx and hasattr(ctx, 'htauth'):
-                auth_header = request.headers.get('Authorization', None)
-                if not auth_header:
-                    return self._unauthorized_response()
+            if not username in ctx.htauth['users']:
+                return _unauthorized_response()
 
-                if not auth_header.startswith('Basic '):
-                    raise RuntimeError('Flask-HTAuth support only Basic auth.')
+            if not check_password(password, ctx.htauth['users'][username]):
+                return _unauthorized_response()
 
-                auth_header = auth_header.replace('Basic ', '')
-                auth_header = base64.b64decode(auth_header)
-                username, password = auth_header.split(':', 1)
+            g.htauth_user = username
 
-                if not username in ctx.htauth['users']:
-                    return self._unauthorized_response()
+        return viewfunc(*args, **kwargs)
 
-                if not check_password(password, ctx.htauth['users'][username]):
-                    return self._unauthorized_response()
-
-            return f(*args, **kwargs)
+    return wrapper
