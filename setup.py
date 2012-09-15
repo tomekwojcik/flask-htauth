@@ -42,7 +42,7 @@ setup(
     tests_require=[
         'nose',
     ],
-    author=u'Tomasz Wójcik',
+    author=u'Tomasz Wójcik'.encode('utf-8'),
     author_email='tomek@bthlabs.pl',
     url='http://tomekwojcik.github.com/flask-htauth/',
     download_url='http://github.com/tomekwojcik/flask-htauth/tarball/v%s' % version,
