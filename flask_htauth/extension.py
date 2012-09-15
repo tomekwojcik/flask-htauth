@@ -14,6 +14,7 @@ from .htpasswd import check_password, read_htpasswd
 
 __all__ = ['HTAuth', 'authenticated']
 
+
 class HTAuth(object):
     """
     This class controls basic HTTP authentication integration with Flask apps.
@@ -47,12 +48,17 @@ class HTAuth(object):
         ctx = stack.top
         if ctx and not hasattr(ctx, 'htauth'):
             if 'HTAUTH_HTPASSWD_PATH' in ctx.app.config:
+                _users = read_htpasswd(ctx.app.config['HTAUTH_HTPASSWD_PATH'])
+                _realm = ctx.app.config.get('HTAUTH_REALM', 'Protected Area').\
+                    encode('utf-8')
+
                 settings = {
-                    'users': read_htpasswd(ctx.app.config['HTAUTH_HTPASSWD_PATH']),
-                    'realm': ctx.app.config.get('HTAUTH_REALM', 'Protected Area').encode('utf-8')
+                    'users': _users,
+                    'realm': _realm
                 }
 
                 ctx.htauth = settings
+
 
 def _unauthorized_response():
     ctx = stack.top
@@ -70,6 +76,7 @@ def _unauthorized_response():
         return rsp
 
     return None
+
 
 def authenticated(viewfunc):
     """Decorate **viewfunc** with this decorator to require HTTP auth on the
