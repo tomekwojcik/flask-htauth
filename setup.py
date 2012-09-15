@@ -23,7 +23,7 @@
 import codecs
 from setuptools import setup
 
-version = '0.1'
+version = '0.1.2'
 
 desc_file = codecs.open('README.rst', 'r', 'utf-8')
 long_description = desc_file.read()
@@ -47,7 +47,7 @@ setup(
     maintainer=u'Tomasz Wójcik'.encode('utf-8'),
     maintainer_email='tomek@bthlabs.pl',
     url='http://tomekwojcik.github.com/flask-htauth/',
-    download_url='http://github.com/tomekwojcik/flask-htauth/tarball/v%s' % version,
+    download_url='https://github.com/tomekwojcik/flask-htauth/tarball/v%s' % version,
     description='Easy to integrate basic HTTP authentication for Flask apps',
     long_description=long_description,
     license='https://github.com/tomekwojcik/flask-htauth/blob/master/LICENSE',
