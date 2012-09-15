@@ -59,7 +59,7 @@ Example app
     def app_secret():
         return 'Hello, ' + g.htauth_user + '!'
 
-If the request is missing ``Authorization`` header or auth data is invalid the ``authenticated`` decorator will return rresponse that will force the user agent to request authentication data from the user.
+If the request is missing ``Authorization`` header or auth data is invalid the ``authenticated`` decorator will return response that will force the user agent to request authentication data from the user.
 
 Features
 --------
@@ -85,9 +85,10 @@ API
 Credits
 -------
 
-Flask-HTAuth is developed by `BTHLabs`_. The extension was inspired by `django-htauth`_.
+Flask-HTAuth is developed by `BTHLabs`_. The extension was inspired by `django-htauth`_. Uses MD5 crypt code from `this snippet`_.
 
 .. _GitHub: http://github.com/tomekwojcik/flask-htauth
 .. _LICENSE: http://github.com/tomekwojcik/flask-htauth/blob/master/LICENSE
 .. _BTHLabs: http://www.bthlabs.pl/
 .. _django-htauth: http://pypi.python.org/pypi/django-htauth/
+.. _this snippet: http://aspn.activestate.com/ASPN/Cookbook/Python/Recipe/325204
