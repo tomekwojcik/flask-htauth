@@ -90,7 +90,7 @@ def authenticated(viewfunc):
                 return _unauthorized_response()
 
             if not auth_header.startswith('Basic '):
-                raise RuntimeError('Flask-HTAuth support only Basic auth.')
+                raise RuntimeError('Flask-HTAuth supports only Basic auth.')
 
             auth_header = auth_header.replace('Basic ', '')
             auth_header = base64.b64decode(auth_header)
