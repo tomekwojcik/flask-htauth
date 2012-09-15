@@ -5,4 +5,8 @@
 *.bak
 htpasswd
 docs/_build
+README.html
+Flask_HTAuth.egg-info/
+build/
+dist/
 
