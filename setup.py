@@ -44,9 +44,11 @@ setup(
     ],
     author=u'Tomasz Wójcik'.encode('utf-8'),
     author_email='tomek@bthlabs.pl',
+    maintainer=u'Tomasz Wójcik'.encode('utf-8'),
+    maintainer_email='tomek@bthlabs.pl',
     url='http://tomekwojcik.github.com/flask-htauth/',
     download_url='http://github.com/tomekwojcik/flask-htauth/tarball/v%s' % version,
-    description='An easy to use forged data generator for Python',
+    description='Easy to integrate basic HTTP authentication for Flask apps',
     long_description=long_description,
     license='https://github.com/tomekwojcik/flask-htauth/blob/master/LICENSE',
     classifiers=[
