@@ -1,0 +1,161 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>Flask-HTAuth &mdash; Flask-HTAuth 0.1 documentation</title>
+    
+    <link rel="stylesheet" href="_static/flasky.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '',
+        VERSION:     '0.1',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <link rel="top" title="Flask-HTAuth 0.1 documentation" href="#" /> 
+  </head>
+  <body>
+  
+  
+  <div class=indexwrapper>
+  
+
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <div class="section" id="module-Flask-HTAuth">
+<span id="flask-htauth"></span><h1>Flask-HTAuth<a class="headerlink" href="#module-Flask-HTAuth" title="Permalink to this headline">¶</a></h1>
+<p><strong>Flask-HTAuth</strong> provides Flask apps with easy to integrate basic HTTP authentication. The extension supports standard htpasswd files.</p>
+<p>Source code and issue tracker are available at <a class="reference external" href="http://github.com/tomekwojcik/flask-htauth">GitHub</a>.</p>
+<div class="section" id="installation">
+<h2>Installation<a class="headerlink" href="#installation" title="Permalink to this headline">¶</a></h2>
+<p>Install with the usual:</p>
+<div class="highlight-none"><div class="highlight"><pre>pip install flask-htauth
+</pre></div>
+</div>
+<p>or download source from GitHub:</p>
+<div class="highlight-none"><div class="highlight"><pre>git clone https://github.com/tomekwojcik/flask-htauth.git
+cd flask-htauth
+python setup.py develop
+</pre></div>
+</div>
+</div>
+<div class="section" id="configuration">
+<h2>Configuration<a class="headerlink" href="#configuration" title="Permalink to this headline">¶</a></h2>
+<p>Flask-HTAuth uses the following settings:</p>
+<ul class="simple">
+<li><tt class="docutils literal"><span class="pre">HTAUTH_HTPASSWD_PATH</span></tt> - path to htpasswd file,</li>
+<li><tt class="docutils literal"><span class="pre">HTAUTH_REALM</span></tt> - authentication realm (defaults to <tt class="docutils literal"><span class="pre">Protected</span> <span class="pre">Area</span></tt>)</li>
+</ul>
+</div>
+<div class="section" id="example-app">
+<h2>Example app<a class="headerlink" href="#example-app" title="Permalink to this headline">¶</a></h2>
+<div class="highlight-python"><div class="highlight"><pre><span class="kn">from</span> <span class="nn">flask</span> <span class="kn">import</span> <span class="n">Flask</span><span class="p">,</span> <span class="n">g</span>
+<span class="kn">from</span> <span class="nn">flask.ext</span> <span class="kn">import</span> <span class="n">htauth</span>
+<span class="kn">import</span> <span class="nn">os</span>
+
+<span class="n">HTPASSWD</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">abspath</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">dirname</span><span class="p">(</span><span class="n">__file__</span><span class="p">)),</span> <span class="s">&#39;htpasswd&#39;</span><span class="p">)</span>
+
+<span class="n">app</span> <span class="o">=</span> <span class="n">Flask</span><span class="p">(</span><span class="n">__name__</span><span class="p">)</span>
+<span class="n">app</span><span class="o">.</span><span class="n">config</span><span class="p">[</span><span class="s">&#39;HTAUTH_HTPASSWD_PATH&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">HTPASSWD</span>
+<span class="n">app</span><span class="o">.</span><span class="n">config</span><span class="p">[</span><span class="s">&#39;HTAUTH_REALM&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="s">&#39;Top Secret Area&#39;</span>
+
+<span class="n">auth</span> <span class="o">=</span> <span class="n">htauth</span><span class="o">.</span><span class="n">HTAuth</span><span class="p">(</span><span class="n">app</span><span class="p">)</span>
+
+<span class="nd">@app.route</span><span class="p">(</span><span class="s">&#39;/&#39;</span><span class="p">)</span>
+<span class="k">def</span> <span class="nf">app_index</span><span class="p">():</span>
+    <span class="k">return</span> <span class="s">&#39;Hello, World!&#39;</span>
+
+<span class="nd">@app.route</span><span class="p">(</span><span class="s">&#39;/secret&#39;</span><span class="p">)</span>
+<span class="nd">@htauth.authenticated</span>
+<span class="k">def</span> <span class="nf">app_secret</span><span class="p">():</span>
+    <span class="k">return</span> <span class="s">&#39;Hello, &#39;</span> <span class="o">+</span> <span class="n">g</span><span class="o">.</span><span class="n">htauth_user</span> <span class="o">+</span> <span class="s">&#39;!&#39;</span>
+</pre></div>
+</div>
+<p>If the request is missing <tt class="docutils literal"><span class="pre">Authorization</span></tt> header or auth data is invalid the <tt class="docutils literal"><span class="pre">authenticated</span></tt> decorator will return response that will force the user agent to request authentication data from the user.</p>
+</div>
+<div class="section" id="features">
+<h2>Features<a class="headerlink" href="#features" title="Permalink to this headline">¶</a></h2>
+<ul class="simple">
+<li>Basic auth,</li>
+<li>Support for MD5, SHA and crypt htpasswd password encrypting.</li>
+</ul>
+</div>
+<div class="section" id="license">
+<h2>License<a class="headerlink" href="#license" title="Permalink to this headline">¶</a></h2>
+<p>Flask-HTAuth is licensed under MIT License. See <a class="reference external" href="http://github.com/tomekwojcik/flask-htauth/blob/master/LICENSE">LICENSE</a> for more details.</p>
+</div>
+<div class="section" id="module-flask.ext.htauth">
+<span id="api"></span><h2>API<a class="headerlink" href="#module-flask.ext.htauth" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="flask.ext.htauth.HTAuth">
+<em class="property">class </em><tt class="descclassname">flask.ext.htauth.</tt><tt class="descname">HTAuth</tt><big>(</big><em>app=None</em><big>)</big><a class="headerlink" href="#flask.ext.htauth.HTAuth" title="Permalink to this definition">¶</a></dt>
+<dd><p>This class controls basic HTTP authentication integration with Flask apps.</p>
+<p>You can either bind the app to an instance:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">app</span> <span class="o">=</span> <span class="n">Flask</span><span class="p">(</span><span class="n">__app__</span><span class="p">)</span>
+<span class="n">auth</span> <span class="o">=</span> <span class="n">HTAuth</span><span class="p">(</span><span class="n">app</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>or create the auth object once and bind it later:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">auth</span> <span class="o">=</span> <span class="n">HTAuth</span><span class="p">()</span>
+
+<span class="k">def</span> <span class="nf">create_app</span><span class="p">():</span>
+    <span class="n">app</span> <span class="o">=</span> <span class="n">Flask</span><span class="p">(</span><span class="n">__name__</span><span class="p">)</span>
+    <span class="n">auth</span><span class="o">.</span><span class="n">init_app</span><span class="p">(</span><span class="n">app</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">app</span>
+</pre></div>
+</div>
+<dl class="method">
+<dt id="flask.ext.htauth.HTAuth.init_app">
+<tt class="descname">init_app</tt><big>(</big><em>app</em><big>)</big><a class="headerlink" href="#flask.ext.htauth.HTAuth.init_app" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bind the <strong>app</strong> to HTAuth instance.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="function">
+<dt id="flask.ext.htauth.authenticated">
+<tt class="descclassname">flask.ext.htauth.</tt><tt class="descname">authenticated</tt><big>(</big><em>viewfunc</em><big>)</big><a class="headerlink" href="#flask.ext.htauth.authenticated" title="Permalink to this definition">¶</a></dt>
+<dd><p>Decorate <strong>viewfunc</strong> with this decorator to require HTTP auth on the
+view.</p>
+</dd></dl>
+
+</div>
+<div class="section" id="credits">
+<h2>Credits<a class="headerlink" href="#credits" title="Permalink to this headline">¶</a></h2>
+<p>Flask-HTAuth is developed by <a class="reference external" href="http://www.bthlabs.pl/">BTHLabs</a>. The extension was inspired by <a class="reference external" href="http://pypi.python.org/pypi/django-htauth/">django-htauth</a>. Uses MD5 crypt code from <a class="reference external" href="http://aspn.activestate.com/ASPN/Cookbook/Python/Recipe/325204">this snippet</a>.</p>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+  
+    <a href="http://github.com/tomekwojcik/flask-htauth"><img style="position: fixed; top: 0; right: 0; border: 0;"
+    src="http://s3.amazonaws.com/github/ribbons/forkme_right_darkblue_121621.png" alt="Fork me on GitHub" /></a>
+  
+
+  
+  </div>
+  
+
+  </body>
+</html>
